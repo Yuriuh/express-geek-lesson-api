@@ -15,6 +15,9 @@ connectDB()
 
 const app = express()
 
+// 配置 body 解析
+app.use(express.json())
+
 app.use(morgan('dev'))
 
 app.get('/', (req, res) => {
