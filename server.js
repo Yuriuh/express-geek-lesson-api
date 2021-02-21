@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
   res.status(200).json({ success: true, msg: 'Hello World' })
 })
 
-// 挂宅路由节点
+// 挂载路由节点
 app.use('/api/v1/course', course)
 
 const PORT = process.env.PORT || 3000
