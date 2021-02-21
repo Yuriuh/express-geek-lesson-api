@@ -3,6 +3,7 @@ const dotenv = require('dotenv')
 const morgan = require('morgan')
 const colors = require('colors')
 const connectDB = require('./config/db')
+const errorHandler = require('./middleware/error')
 
 // 路由
 const course = require('./routes/course')
@@ -26,6 +27,9 @@ app.get('/', (req, res) => {
 
 // 挂载路由节点
 app.use('/api/v1/course', course)
+
+// 使用错误处理中间件，必须在挂载路由节点之后
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3000
 
