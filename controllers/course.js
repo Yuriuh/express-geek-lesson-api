@@ -1,4 +1,5 @@
 const Course = require('../models/Course')
+const ErrorResponse = require('../utils/errorResponse')
 
 /**
  * @desc   获取所有课程
@@ -35,17 +36,17 @@ exports.createCourse = async (req, res, next) => {
  * @access 公开的
  */
 exports.getCourse = async (req, res, next) => {
+  const id = req.params.id
+  const error = new ErrorResponse(`Resource not found with id of ${id}`, 404)
   try {
-    const id = req.params.id
     const course = await Course.findById(id)
 
     if (!course) {
-      return res.status(400).json({ success: false, data: {} })
+      return next(error)
     }
 
     res.status(200).json({ success: true, data: course })
-  } catch (error) {
-    // res.status(400).json({ success: false, error })
+  } catch {
     next(error)
   }
 }
