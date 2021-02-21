@@ -37,16 +37,18 @@ exports.createCourse = async (req, res, next) => {
  */
 exports.getCourse = async (req, res, next) => {
   const id = req.params.id
-  const error = new ErrorResponse(`Resource not found with id of ${id}`, 404)
   try {
     const course = await Course.findById(id)
-
+    const error = new ErrorResponse(
+      `Resource not found with the value of ${id}`,
+      404
+    )
     if (!course) {
       return next(error)
     }
 
     res.status(200).json({ success: true, data: course })
-  } catch {
+  } catch (error) {
     next(error)
   }
 }
@@ -57,21 +59,26 @@ exports.getCourse = async (req, res, next) => {
  * @access 公开的
  */
 exports.updateCourse = async (req, res, next) => {
+  const id = req.params.id
+  const body = req.body
   try {
-    const id = req.params.id
-    const body = req.body
     const course = await Course.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     })
 
+    const error = new ErrorResponse(
+      `Resource not found with the value of ${id}`,
+      404
+    )
+
     if (!course) {
-      return res.status(400).json({ success: false, data: {} })
+      return next(error)
     }
 
     res.status(200).json({ success: true, data: course })
   } catch (error) {
-    res.status(400).json({ success: false, error })
+    next(error)
   }
 }
 
@@ -81,16 +88,21 @@ exports.updateCourse = async (req, res, next) => {
  * @access 公开的
  */
 exports.deleteCourse = async (req, res, next) => {
+  const id = req.params.id
   try {
-    const id = req.params.id
     const course = await Course.findByIdAndDelete(id)
 
+    const error = new ErrorResponse(
+      `Resource not found with the value of ${id}`,
+      404
+    )
+
     if (!course) {
-      return res.status(400).json({ success: false, data: {} })
+      return next(error)
     }
 
     res.status(200).json({ success: true, data: {} })
   } catch (error) {
-    res.status(400).json({ success: false, error })
+    next(error)
   }
 }
