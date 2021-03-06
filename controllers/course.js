@@ -8,7 +8,14 @@ const asnycHandler = require('../middleware/async')
  * @access 公开的
  */
 exports.getCourseAll = asnycHandler(async (req, res, next) => {
-  const courses = await Course.find()
+  const queryString = JSON.stringify(req.query)
+  console.log('queryString', queryString)
+  const replacedQueryString = queryString.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    match => `$${match}`
+  )
+  console.log('replacedQueryString', replacedQueryString)
+  const courses = await Course.find(JSON.parse(replacedQueryString))
   const count = courses.length
   res.status(200).json({ success: true, count, data: courses })
 })

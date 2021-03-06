@@ -23,14 +23,17 @@ const CourseSchema = new mongoose.Schema({
     required: [true, '请添加学习后的程度'],
     enum: ['初级', '中级', '高级'],
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  averageCost: {
+    type: Number,
   },
   user: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: [true, '请添加用户'],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 })
 
