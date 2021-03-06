@@ -8,14 +8,33 @@ const asnycHandler = require('../middleware/async')
  * @access 公开的
  */
 exports.getCourseAll = asnycHandler(async (req, res, next) => {
-  const queryString = JSON.stringify(req.query)
-  console.log('queryString', queryString)
+  const { query } = req
+  const reqQuery = { ...query }
+
+  const fieldsToRemove = ['select', 'sort']
+  fieldsToRemove.forEach(field => delete reqQuery[field])
+
+  const queryString = JSON.stringify(reqQuery)
   const replacedQueryString = queryString.replace(
     /\b(gt|gte|lt|lte|in)\b/g,
     match => `$${match}`
   )
-  console.log('replacedQueryString', replacedQueryString)
-  const courses = await Course.find(JSON.parse(replacedQueryString))
+  let dbQuery = Course.find(JSON.parse(replacedQueryString))
+
+  if (query.select) {
+    const selectBy = query.select.split(',').join(' ')
+    dbQuery = dbQuery.select(selectBy)
+  }
+
+  if (query.sort) {
+    const sortBy = query.sort.split(',').join(' ')
+    dbQuery = dbQuery.sort(sortBy)
+  } else {
+    dbQuery = dbQuery.sort('-createdAt')
+  }
+
+  const courses = await dbQuery
+
   const count = courses.length
   res.status(200).json({ success: true, count, data: courses })
 })
