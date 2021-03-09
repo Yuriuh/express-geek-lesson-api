@@ -11,7 +11,7 @@ exports.getCourseAll = asnycHandler(async (req, res, next) => {
   const { query } = req
   const reqQuery = { ...query }
 
-  const fieldsToRemove = ['select', 'sort']
+  const fieldsToRemove = ['select', 'sort', 'page', 'limit']
   fieldsToRemove.forEach(field => delete reqQuery[field])
 
   const queryString = JSON.stringify(reqQuery)
@@ -33,10 +33,35 @@ exports.getCourseAll = asnycHandler(async (req, res, next) => {
     dbQuery = dbQuery.sort('-createdAt')
   }
 
+  // 分页
+  const page = parseInt(query.page, 10) || 1
+  const limit = parseInt(query.limit, 10) || 2
+  const index = (page - 1) * limit
+  const startIndex = (page - 1) * limit
+  const endIndex = page * limit
+  const total = await Course.countDocuments()
+
+  dbQuery.skip(startIndex).limit(limit)
+
   const courses = await dbQuery
 
+  // 分页返回值
+  const pagination = {}
+  if (startIndex > 0) {
+    pagination.prev = { page: page - 1, limit }
+  }
+
+  if (endIndex < total) {
+    pagination.next = { page: page + 1, limit }
+  }
+
   const count = courses.length
-  res.status(200).json({ success: true, count, data: courses })
+  res.status(200).json({
+    success: true,
+    count,
+    pagination,
+    data: courses,
+  })
 })
 
 /**
