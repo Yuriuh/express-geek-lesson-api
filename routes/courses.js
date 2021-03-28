@@ -3,14 +3,14 @@ const router = express.Router()
 
 // 引入控制器
 const {
-  getCourseAll,
+  getCourses,
   createCourse,
   getCourse,
   updateCourse,
   deleteCourse,
-} = require('../controllers/course')
+} = require('../controllers/courses')
 
-router.route('/').get(getCourseAll).post(createCourse)
+router.route('/').get(getCourses).post(createCourse)
 
 router.route('/:id').get(getCourse).put(updateCourse).delete(deleteCourse)
 

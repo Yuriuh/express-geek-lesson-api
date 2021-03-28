@@ -1,13 +1,13 @@
-const Course = require('../models/Course')
+const Camp = require('../models/Camp')
 const ErrorResponse = require('../utils/errorResponse')
 const asnycHandler = require('../middleware/async')
 
 /**
- * @desc   获取所有课程
- * @route  GET /api/v1/course
+ * @desc   获取所有训练营
+ * @route  GET /api/v1/camps
  * @access 公开的
  */
-exports.getCourseAll = asnycHandler(async (req, res, next) => {
+exports.getCamps = asnycHandler(async (req, res, next) => {
   const { query } = req
   const reqQuery = { ...query }
 
@@ -19,7 +19,7 @@ exports.getCourseAll = asnycHandler(async (req, res, next) => {
     /\b(gt|gte|lt|lte|in)\b/g,
     match => `$${match}`
   )
-  let dbQuery = Course.find(JSON.parse(replacedQueryString))
+  let dbQuery = Camp.find(JSON.parse(replacedQueryString))
 
   if (query.select) {
     const selectBy = query.select.split(',').join(' ')
@@ -36,14 +36,13 @@ exports.getCourseAll = asnycHandler(async (req, res, next) => {
   // 分页
   const page = parseInt(query.page, 10) || 1
   const limit = parseInt(query.limit, 10) || 2
-  const index = (page - 1) * limit
   const startIndex = (page - 1) * limit
   const endIndex = page * limit
-  const total = await Course.countDocuments()
+  const total = await Camp.countDocuments()
 
   dbQuery.skip(startIndex).limit(limit)
 
-  const courses = await dbQuery
+  const camps = await dbQuery
 
   // 分页返回值
   const pagination = {}
@@ -55,54 +54,54 @@ exports.getCourseAll = asnycHandler(async (req, res, next) => {
     pagination.next = { page: page + 1, limit }
   }
 
-  const count = courses.length
+  const count = camps.length
   res.status(200).json({
     success: true,
     count,
     pagination,
-    data: courses,
+    data: camps,
   })
 })
 
 /**
  * @desc   创建课程
- * @route  POST /api/v1/course
+ * @route  POST /api/v1/camp
  * @access 公开的
  */
-exports.createCourse = asnycHandler(async (req, res, next) => {
-  const course = await Course.create(req.body)
-  res.status(200).json({ success: true, data: course })
+exports.createCamp = asnycHandler(async (req, res, next) => {
+  const camp = await Camp.create(req.body)
+  res.status(200).json({ success: true, data: camp })
 })
 
 /**
  * @desc   查看某个课程
- * @route  GET /api/v1/course/:id
+ * @route  GET /api/v1/camp/:id
  * @access 公开的
  */
-exports.getCourse = asnycHandler(async (req, res, next) => {
+exports.getCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
-  const course = await Course.findById(id)
+  const camp = await Camp.findById(id)
   const error = new ErrorResponse(
     `Resource not found with the value of ${id}`,
     404
   )
 
-  if (!course) {
+  if (!camp) {
     return next(error)
   }
 
-  res.status(200).json({ success: true, data: course })
+  res.status(200).json({ success: true, data: camp })
 })
 
 /**
  * @desc   更新课程
- * @route  PUT /api/v1/course/:id
+ * @route  PUT /api/v1/camp/:id
  * @access 公开的
  */
-exports.updateCourse = asnycHandler(async (req, res, next) => {
+exports.updateCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
   const body = req.body
-  const course = await Course.findByIdAndUpdate(id, body, {
+  const camp = await Camp.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true,
   })
@@ -112,27 +111,27 @@ exports.updateCourse = asnycHandler(async (req, res, next) => {
     404
   )
 
-  if (!course) {
+  if (!camp) {
     return next(error)
   }
 
-  res.status(200).json({ success: true, data: course })
+  res.status(200).json({ success: true, data: camp })
 })
 
 /**
  * @desc   课程课程
- * @route  DELETE /api/v1/course/:id
+ * @route  DELETE /api/v1/camp/:id
  * @access 公开的
  */
-exports.deleteCourse = asnycHandler(async (req, res, next) => {
+exports.deleteCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
-  const course = await Course.findByIdAndDelete(id)
+  const camp = await Camp.findByIdAndDelete(id)
   const error = new ErrorResponse(
     `Resource not found with the value of ${id}`,
     404
   )
 
-  if (!course) {
+  if (!camp) {
     return next(error)
   }
 
