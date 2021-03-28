@@ -19,7 +19,7 @@ exports.getCamps = asnycHandler(async (req, res, next) => {
     /\b(gt|gte|lt|lte|in)\b/g,
     match => `$${match}`
   )
-  let dbQuery = Camp.find(JSON.parse(replacedQueryString))
+  let dbQuery = Camp.find(JSON.parse(replacedQueryString)).populate('courses')
 
   if (query.select) {
     const selectBy = query.select.split(',').join(' ')

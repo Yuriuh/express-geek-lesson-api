@@ -29,14 +29,15 @@ const CourseSchema = new mongoose.Schema({
   },
   camp: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Mscamp',
+    // 数据关联
+    ref: 'Camp',
     required: true,
   },
-  user: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'User',
-    required: true,
-  },
+  // user: {
+  //   type: mongoose.Schema.ObjectId,
+  //   ref: 'User',
+  //   required: true,
+  // },
 })
 
 module.exports = mongoose.model('Course', CourseSchema)

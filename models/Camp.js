@@ -66,10 +66,19 @@ const CampSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
+  // 数据互联：后添加的数据关联先添加的数据
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 )
+
+// 数据互联：后添加的数据关联先添加的数据
+CampSchema.virtual('courses', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'camp',
+  justOne: false,
+})
 
 module.exports = mongoose.model('Camp', CampSchema)
