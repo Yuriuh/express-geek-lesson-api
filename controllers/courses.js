@@ -14,19 +14,17 @@ exports.getCourses = asnycHandler(async (req, res, next) => {
     params: { campId },
   } = req
 
-  let query
-
   if (campId) {
-    query = Course.find({ camp: campId })
-  } else {
-    query = Course.find().populate({
-      path: 'camp',
-      select: 'name description',
+    // 这个地方如何支持高级查询
+    const courses = await Course.find({ camp: campId })
+    return res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses,
     })
+  } else {
+    res.status(200).json(res.advancedResults)
   }
-
-  const courses = await query
-  res.status(200).json({ success: true, count: courses.length, data: courses })
 })
 
 /**
