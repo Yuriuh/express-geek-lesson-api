@@ -8,6 +8,7 @@ const errorHandler = require('./middleware/error')
 // 路由
 const camps = require('./routes/camps')
 const courses = require('./routes/courses')
+const auth = require('./routes/auth')
 
 dotenv.config({
   path: './config/config.env',
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 // 挂载路由节点
 app.use('/api/v1/camps', camps)
 app.use('/api/v1/courses', courses)
+app.use('/api/v1/auth', auth)
 
 // 使用错误处理中间件，必须在挂载路由节点之后
 app.use(errorHandler)
