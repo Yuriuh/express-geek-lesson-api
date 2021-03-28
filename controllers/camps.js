@@ -125,7 +125,8 @@ exports.updateCamp = asnycHandler(async (req, res, next) => {
  */
 exports.deleteCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
-  const camp = await Camp.findByIdAndDelete(id)
+  const camp = await Camp.findById(id)
+
   const error = new ErrorResponse(
     `Resource not found with the value of ${id}`,
     404
@@ -134,6 +135,8 @@ exports.deleteCamp = asnycHandler(async (req, res, next) => {
   if (!camp) {
     return next(error)
   }
+
+  camp.remove()
 
   res.status(200).json({ success: true, data: {} })
 })

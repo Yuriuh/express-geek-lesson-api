@@ -25,7 +25,7 @@ exports.getCourses = asnycHandler(async (req, res, next) => {
   }
 
   const courses = await query
-  res.status(200).json({ success: true, data: courses, count: courses.length })
+  res.status(200).json({ success: true, count: courses.length, data: courses })
 })
 
 /**

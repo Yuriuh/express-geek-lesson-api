@@ -81,4 +81,10 @@ CampSchema.virtual('courses', {
   justOne: false,
 })
 
+// 配置前置钩子
+CampSchema.pre('remove', async function (next) {
+  await this.model('Course').deleteMany({ camp: this._id })
+  next()
+})
+
 module.exports = mongoose.model('Camp', CampSchema)
