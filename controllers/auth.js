@@ -8,5 +8,8 @@ const asnycHandler = require('../middleware/async')
  * @access public
  */
 exports.register = asnycHandler(async (req, res, next) => {
+  const { name, email, password, role } = req.body
+  // 注册用户
+  await User.create({ name, email, password, role })
   res.status(200).json({ success: true })
 })
