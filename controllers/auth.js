@@ -10,6 +10,8 @@ const asnycHandler = require('../middleware/async')
 exports.register = asnycHandler(async (req, res, next) => {
   const { name, email, password, role } = req.body
   // 注册用户
-  await User.create({ name, email, password, role })
-  res.status(200).json({ success: true })
+  const user = await User.create({ name, email, password, role })
+  // 生成 token
+  const token = user.getSignedJwtToken()
+  res.status(200).json({ success: true, token })
 })
