@@ -47,6 +47,16 @@ exports.login = asnycHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res)
 })
 
+/**
+ * @desc   获取当前登录用户信息
+ * @route  GET /api/v1/auth/me
+ * @access public
+ */
+exports.getMe = asnycHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id)
+  res.status(200).json({ success: true, data: user })
+})
+
 // 生成 token 并存储到 cookie 的方法
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken()
@@ -61,5 +71,8 @@ const sendTokenResponse = (user, statusCode, res) => {
     options.secure = true
   }
 
-  res.status(statusCode).cookie('token', token, options).json()
+  res.status(statusCode).cookie('token', token, options).json({
+    success: true,
+    token,
+  })
 }
