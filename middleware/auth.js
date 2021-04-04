@@ -27,3 +27,13 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('没有权限', 401))
   }
 })
+
+// 通过用户的角色，控制访问的路由权限
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new ErrorResponse('该用户无权限访问此路由', 403))
+    }
+    next()
+  }
+}
