@@ -2,8 +2,9 @@ const express = require('express')
 const router = express.Router()
 
 // 引入控制器
-const { register } = require('../controllers/auth')
+const { register, login } = require('../controllers/auth')
 
 router.post('/register', register)
+router.post('/login', login)
 
 module.exports = router

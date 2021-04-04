@@ -46,4 +46,9 @@ UserSchema.methods.getSignedJwtToken = function () {
   })
 }
 
+// 密码匹配方法
+UserSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password)
+}
+
 module.exports = mongoose.model('User', UserSchema)
