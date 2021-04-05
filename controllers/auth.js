@@ -4,7 +4,7 @@ const asnycHandler = require('../middleware/async')
 
 /**
  * @desc   注册
- * @route  GET /api/v1/auth/register
+ * @route  POST /api/v1/auth/register
  * @access public
  */
 exports.register = asnycHandler(async (req, res, next) => {
@@ -17,7 +17,7 @@ exports.register = asnycHandler(async (req, res, next) => {
 
 /**
  * @desc   登录
- * @route  GET /api/v1/auth/login
+ * @route  POST /api/v1/auth/login
  * @access public
  */
 exports.login = asnycHandler(async (req, res, next) => {
@@ -37,10 +37,10 @@ exports.login = asnycHandler(async (req, res, next) => {
   }
 
   // 密码匹配
-  const isMatched = user.matchPassword(password)
+  const isMatched = await user.matchPassword(password)
 
   if (!isMatched) {
-    return next(new ErrorResponse('密码错误', 400))
+    return next(new ErrorResponse('密码错误', 401))
   }
 
   // 生成 token
@@ -55,6 +55,56 @@ exports.login = asnycHandler(async (req, res, next) => {
 exports.getMe = asnycHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id)
   res.status(200).json({ success: true, data: user })
+})
+
+/**
+ * @desc   更新当前登录用户信息
+ * @route  PUT /api/v1/auth/update-details
+ * @access private
+ */
+exports.updateDetails = asnycHandler(async (req, res, next) => {
+  const { name, email } = req.body
+  const fieldsToUpdate = {}
+  if (name) {
+    fieldsToUpdate.name = name
+  }
+  if (email) {
+    fieldsToUpdate.email = email
+  }
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  })
+  res.status(200).json({ success: true, data: user })
+})
+
+/**
+ * @desc   更新当前登录用户密码
+ * @route  PUT /api/v1/auth/update-password
+ * @access private
+ */
+exports.updatePassword = asnycHandler(async (req, res, next) => {
+  // 旧密码 新密码
+  const user = await User.findById(req.user.id).select('+password')
+
+  // 判断旧密码和数据库密码是否一致
+  const isMatched = await user.matchPassword(req.body.currentPassword)
+  if (!isMatched) {
+    return next(new ErrorResponse('密码错误', 401))
+  }
+
+  const isEqual = await user.matchPassword(req.body.newPassword)
+  if (isEqual) {
+    return next(new ErrorResponse('新密码不可与原密码相同', 400))
+  }
+
+  // 更新密码
+  user.password = req.body.newPassword
+
+  // 存储到数据库
+  await user.save()
+
+  sendTokenResponse(user, 200, res)
 })
 
 // 生成 token 并存储到 cookie 的方法
