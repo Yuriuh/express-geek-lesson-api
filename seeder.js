@@ -10,6 +10,7 @@ dotenv.config({
 const Camp = require('./models/Camp')
 const Course = require('./models/Course')
 const User = require('./models/User')
+const Review = require('./models/Review')
 
 // 连接数据库
 mongoose.connect(process.env.LOC_MONGO_URI, {
@@ -32,11 +33,16 @@ const users = JSON.parse(
   fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8')
 )
 
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/_data/reviews.json`, 'utf-8')
+)
+
 const insertData = async () => {
   try {
     await Camp.create(camps)
     await Course.create(courses)
     await User.create(users)
+    await Review.create(reviews)
     console.log('数据存储成功'.green.inverse)
     process.exit()
   } catch (error) {
@@ -50,6 +56,7 @@ const deleteData = async () => {
     await Camp.deleteMany()
     await Course.deleteMany()
     await User.deleteMany()
+    await Review.deleteMany()
     console.log('数据删除成功'.red.inverse)
     process.exit()
   } catch (error) {

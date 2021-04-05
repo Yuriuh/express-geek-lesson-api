@@ -20,6 +20,9 @@ const Camp = require('../models/Camp')
 const courseRouter = require('./courses')
 router.use('/:campId/courses', courseRouter)
 
+const reviewRouter = require('./reviews')
+router.use('/:campId/reviews', reviewRouter)
+
 router
   .route('/')
   .get(advancedResults(Camp, 'courses'), getCamps)
