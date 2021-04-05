@@ -1,6 +1,8 @@
+const crypto = require('crypto')
 const User = require('../models/User')
 const ErrorResponse = require('../utils/errorResponse')
 const asnycHandler = require('../middleware/async')
+const { sendEamil } = require('../utils/email')
 
 /**
  * @desc   注册
@@ -105,6 +107,48 @@ exports.updatePassword = asnycHandler(async (req, res, next) => {
   await user.save()
 
   sendTokenResponse(user, 200, res)
+})
+
+/**
+ * @desc   忘记密码
+ * @route  POST /api/v1/auth/forget-password
+ * @access public
+ */
+exports.forgetPassword = asnycHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email })
+
+  if (!user) {
+    return next(new ErrorResponse('未找到该用户', 404))
+  }
+
+  const resetToken = user.getResetPasswordToken()
+
+  // await user.save({ validateBeforeSave: false })
+
+  // 发送邮件 包含重置密码的网址
+  // {{URL}}/api/v1/auth/reset-password/xxx-token
+  const resetUrl = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/reset-password/${resetToken}`
+
+  const message = `收到该邮件的原因是你需要重置密码，请点击链接: ${resetUrl}`
+
+  // 发送邮件
+  try {
+    await sendEamil({
+      email: user.email,
+      subject: '重置密码',
+      message,
+    })
+  } catch (error) {
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+
+    // await user.save({ validateBeforeSave: false })
+    return next(new ErrorResponse('邮件发送失败', 500))
+  }
+
+  res.status(200).json({ success: true, data: user })
 })
 
 // 生成 token 并存储到 cookie 的方法
