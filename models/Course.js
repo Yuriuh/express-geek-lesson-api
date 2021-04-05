@@ -33,11 +33,12 @@ const CourseSchema = new mongoose.Schema({
     ref: 'Camp',
     required: true,
   },
-  // user: {
-  //   type: mongoose.Schema.ObjectId,
-  //   ref: 'User',
-  //   required: true,
-  // },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    // 关联 User
+    ref: 'User',
+    required: true,
+  },
 })
 
 module.exports = mongoose.model('Course', CourseSchema)

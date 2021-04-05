@@ -38,16 +38,21 @@ exports.addCourse = asnycHandler(async (req, res, next) => {
   } = req
   const camp = await Camp.findById(campId)
 
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${campId}`,
-    404
-  )
-
   if (!camp) {
-    return next(error)
+    return next(notFoundError(campId))
   }
 
-  const course = await Course.create(req.body)
+  if (camp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(`该用户${req.user.id}无权限在此训练营添加课程`, 401)
+    )
+  }
+
+  const course = await Course.create({
+    camp: campId,
+    user: req.user.id,
+    ...req.body,
+  })
   res.status(200).json({ success: true, data: course })
 })
 
@@ -62,13 +67,9 @@ exports.getCourse = asnycHandler(async (req, res, next) => {
     path: 'camp',
     select: 'name description',
   })
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${id}`,
-    404
-  )
 
   if (!course) {
-    return next(error)
+    return next(notFoundError(id))
   }
 
   res.status(200).json({ success: true, data: course })
@@ -84,13 +85,12 @@ exports.updateCourse = asnycHandler(async (req, res, next) => {
   const body = req.body
   let course = await Course.findById(id)
 
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${id}`,
-    404
-  )
-
   if (!course) {
-    return next(error)
+    return next(notFoundError(id))
+  }
+
+  if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(new ErrorResponse(`该用户${req.user.id}无权限更新此课程`, 401))
   }
 
   course = await Course.findByIdAndUpdate(id, body, {
@@ -109,16 +109,20 @@ exports.updateCourse = asnycHandler(async (req, res, next) => {
 exports.deleteCourse = asnycHandler(async (req, res, next) => {
   const id = req.params.id
   const course = await Course.findById(id)
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${id}`,
-    404
-  )
 
   if (!course) {
-    return next(error)
+    return next(notFoundError(id))
+  }
+
+  if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(new ErrorResponse(`该用户${req.user.id}无权限删除此课程`, 401))
   }
 
   course.remove()
 
   res.status(200).json({ success: true, data: {} })
 })
+
+const notFoundError = id => {
+  return new ErrorResponse(`Resource not found with the value of ${id}`, 404)
+}

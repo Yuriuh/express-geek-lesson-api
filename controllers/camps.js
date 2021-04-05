@@ -62,7 +62,7 @@ exports.updateCamp = asnycHandler(async (req, res, next) => {
 
   // 确定当前的 id 和登录的用户的 id 是一致的
   if (camp.user.toString() !== req.user.id && req.user.role !== 'admin') {
-    return next(new ErrorResponse(`该用户${id}无权限更新此数据`, 401))
+    return next(new ErrorResponse(`该用户${id}无权限更新此训练营`, 401))
   }
 
   camp = await Camp.findByIdAndUpdate(id, body, {
@@ -87,7 +87,7 @@ exports.deleteCamp = asnycHandler(async (req, res, next) => {
   }
 
   if (camp.user.toString() !== req.user.id && req.user.role !== 'admin') {
-    return next(new ErrorResponse(`该用户${id}无权限删除此数据`, 401))
+    return next(new ErrorResponse(`该用户${id}无权限删除此训练营`, 401))
   }
 
   camp.remove()
