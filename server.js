@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser')
 const camps = require('./routes/camps')
 const courses = require('./routes/courses')
 const auth = require('./routes/auth')
+const users = require('./routes/users')
 
 dotenv.config({
   path: './config/config.env',
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/camps', camps)
 app.use('/api/v1/courses', courses)
 app.use('/api/v1/auth', auth)
+app.use('/api/v1/users', users)
 
 // 使用错误处理中间件，必须在挂载路由节点之后
 app.use(errorHandler)

@@ -11,9 +11,6 @@ const advancedResults = (model, populate) => async (req, res, next) => {
     match => `$${match}`
   )
 
-  console.log('req qeury', query)
-  console.log('req params', req.params)
-
   let dbQuery = model.find(JSON.parse(replacedQueryString))
 
   if (query.select) {
