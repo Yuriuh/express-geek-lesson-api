@@ -123,7 +123,7 @@ exports.forgetPassword = asnycHandler(async (req, res, next) => {
 
   const resetToken = user.getResetPasswordToken()
 
-  // await user.save({ validateBeforeSave: false })
+  await user.save({ validateBeforeSave: false })
 
   // 发送邮件 包含重置密码的网址
   // {{URL}}/api/v1/auth/reset-password/xxx-token
@@ -144,11 +144,47 @@ exports.forgetPassword = asnycHandler(async (req, res, next) => {
     user.resetPasswordToken = undefined
     user.resetPasswordExpire = undefined
 
-    // await user.save({ validateBeforeSave: false })
+    await user.save({ validateBeforeSave: false })
     return next(new ErrorResponse('邮件发送失败', 500))
   }
 
   res.status(200).json({ success: true, data: user })
+})
+
+/**
+ * @desc   重置密码
+ * @route  PUT /api/v1/auth/reset-password
+ * @access public
+ */
+exports.resetPassword = asnycHandler(async (req, res, next) => {
+  console.log('resetToken', req.params.resetToken)
+
+  // 获取 resetPasswordToken
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.resetToken)
+    .digest('hex')
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  })
+
+  console.log('user', user)
+
+  if (!user) {
+    return next(new ErrorResponse('token不合法', 401))
+  }
+
+  // 重置密码
+  user.password = req.body.password
+  user.resetPasswordToken = undefined
+  user.resetPasswordExpire = undefined
+
+  // 存储
+  await user.save({ validateBeforeSave: false })
+
+  sendTokenResponse(user, 200, res)
 })
 
 // 生成 token 并存储到 cookie 的方法
