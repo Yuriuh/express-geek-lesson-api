@@ -38,13 +38,9 @@ exports.createCamp = asnycHandler(async (req, res, next) => {
 exports.getCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
   const camp = await Camp.findById(id)
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${id}`,
-    404
-  )
 
   if (!camp) {
-    return next(error)
+    return next(notFoundError(id))
   }
 
   res.status(200).json({ success: true, data: camp })
@@ -58,19 +54,21 @@ exports.getCamp = asnycHandler(async (req, res, next) => {
 exports.updateCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
   const body = req.body
-  const camp = await Camp.findByIdAndUpdate(id, body, {
+  let camp = await Camp.findById(id)
+
+  if (!camp) {
+    return next(notFoundError(id))
+  }
+
+  // 确定当前的 id 和登录的用户的 id 是一致的
+  if (camp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(new ErrorResponse(`该用户${id}无权限更新此数据`, 401))
+  }
+
+  camp = await Camp.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true,
   })
-
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${id}`,
-    404
-  )
-
-  if (!camp) {
-    return next(error)
-  }
 
   res.status(200).json({ success: true, data: camp })
 })
@@ -84,16 +82,19 @@ exports.deleteCamp = asnycHandler(async (req, res, next) => {
   const id = req.params.id
   const camp = await Camp.findById(id)
 
-  const error = new ErrorResponse(
-    `Resource not found with the value of ${id}`,
-    404
-  )
-
   if (!camp) {
-    return next(error)
+    return next(notFoundError(id))
+  }
+
+  if (camp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(new ErrorResponse(`该用户${id}无权限删除此数据`, 401))
   }
 
   camp.remove()
 
   res.status(200).json({ success: true, data: {} })
 })
+
+const notFoundError = id => {
+  return new ErrorResponse(`Resource not found with the value of ${id}`, 404)
+}
